@@ -1,4 +1,4 @@
-import {URL_LIST,URL_SEARCH, URL_DETAIL, URL_PERSON, URL_CAST, URL_VIDEO, API_KEY, API_KEY_ALT} from '../const';
+import {URL_LIST,URL_SEARCH, URL_DETAIL, URL_PERSON, URL_CAST, URL_VIDEO, API_KEY, API_KEY_ALT, SIMILAR} from '../const';
 // action types
 export const SEARCH_MOVIE = 'SEARCH_MOVIE';
 export const SEARCH_MOVIE_SUCCESS = 'SEARCH_MOVIE_SUCCESS';
@@ -18,6 +18,9 @@ export const FETCH_CASTS_FAILURE = 'FETCH_CASTS_FAILURE';
 export const FETCH_TRAILERS = 'FETCH_TRAILERS';
 export const FETCH_TRAILERS_SUCCESS = 'FETCH_TRAILERS_SUCCESS';
 export const FETCH_TRAILERS_FAILURE = 'FETCH_TRAILERS_FAILURE';
+export const FETCH_SIMILARS = 'FETCH_SIMILARS';
+export const FETCH_SIMILARS_SUCCESS = 'FETCH_SIMILARS_SUCCESS';
+export const FETCH_SIMILARS_FAILURE = 'FETCH_SIMILARS_FAILURE';
 
 function searchMovie(searchText) {
   return {
@@ -135,6 +138,26 @@ function fetchTrailersFail(error) {
   };
 }
 
+function fetchSimilars() {
+  return {
+    type: FETCH_SIMILARS
+  };
+}
+
+function fetchSimilarsSuccess(data) {
+  return {
+    type: FETCH_SIMILARS_SUCCESS,
+    data
+  };
+}
+
+function fetchSimilarsFail(error) {
+  return {
+    type: FETCH_SIMILARS_FAILURE,
+    error
+  };
+}
+
 export function searchMovieList(keyword){
   let url = URL_SEARCH + keyword + API_KEY_ALT;
   return function(dispatch){
@@ -208,5 +231,19 @@ export function fetchTrailerList(id){
         });
         dispatch(fetchTrailersSuccess(youtubeTrailers));
       }).catch(error => dispatch(fetchTrailersFail(error)))
+  }
+}
+
+//https://api.themoviedb.org/3/movie/5/similar?api_key=542003918769df50083a13c415bbc602&language=en-US&page=1
+
+export function fetchSimilarMovieList(id){
+  const url_similar = URL_DETAIL + id + SIMILAR + API_KEY;
+  return function(dispatch){
+    dispatch(fetchSimilars())
+    return fetch(url_similar)
+      .then(response => response.json())
+      .then(json => json.cast)
+      .then(data => dispatch(fetchSimilarsSuccess(data)))
+      .catch(error => dispatch(fetchSimilarsFail(error)))
   }
 }
